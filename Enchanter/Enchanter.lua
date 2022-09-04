@@ -18,12 +18,12 @@ function EC.GetItems()
 
 	CastSpellByName("Enchanting")
 	for i = 1, GetNumCrafts(), 1 do
-        local craftName, _, craftType, numAvailable = GetCraftInfo(i);
-		if EC.RecipeTags["enGB"][craftName] ~= nil then 
+		local craftName, _, craftType, numAvailable = GetCraftInfo(i);
+		if EC.RecipeTags["enGB"][craftName] ~= nil then
 			EC.DBChar.RecipeLinks[craftName] = GetCraftRecipeLink(i)
 			EC.DBChar.RecipeList[craftName] = EC.RecipeTags["enGB"][craftName]
 		end
-    end
+	end
 
 	if EC.DB.NetherRecipes then
 		for _, v in pairs(EC.RecipesWithNether) do
@@ -47,7 +47,7 @@ function EC.Init()
 	-- Initalize options
 	if not EnchanterDB then EnchanterDB = {} end -- fresh DB
 	if not EnchanterDBChar then EnchanterDBChar = {} end -- fresh DB
-	
+
 	EC.DB=EnchanterDB
 	EC.DBChar=EnchanterDBChar
 
@@ -62,7 +62,7 @@ function EC.Init()
 		{"scan","MUST BE RAN PRIOR TO /ee start. Scans and stores your enchanting recipes to be used when filter for requests. NOTE: You need to rerun this when you learn new recipes",function()
 			EC.GetItems()
 			print("Scan Completed")
-			end},
+		end},
 		{{"stop", "pause"},"Pauses addon",EC.Stop},
 		{"start","Starts the addon. It will begin parsing chat looking for requests",EC.Start},
 		{{"default", "reset"},"Resets everything to default values",function()
@@ -75,7 +75,7 @@ function EC.Init()
 			if EC.DBChar.Debug== true then
 				EC.DBChar.Debug = false
 				print("Debug mode is now off")
-			else 
+			else
 				EC.DBChar.Debug = true
 				print("Debug mode is now on")
 			end
@@ -84,23 +84,23 @@ function EC.Init()
 	})
 
 	EC.OptionsInit()
-    EC.Initalized = true
+	EC.Initalized = true
 
 	print("|cFFFF1C1C Loaded: "..GetAddOnMetadata(TOCNAME, "Title") .." ".. GetAddOnMetadata(TOCNAME, "Version") .." by "..GetAddOnMetadata(TOCNAME, "Author"))
 end
 
 -- Sends a msg with the enchanting links that enchanter is capable of doing
 function EC.SendMsg(name)
-		if EC.LfRecipeList[name] ~= nil then
-			-- Iterates over the matches requested enchants (that is capable of doing) adds them to the message
-			local msg = EC.DB.MsgPrefix
-			local msgSuffix = EC.DB.MsgSuffix
-			for k, _ in pairs(EC.LfRecipeList[name]) do 
-				msg = msg .. EC.DBChar.RecipeLinks[k] .. msgSuffix
-			end
-			SendChatMessage(msg, "WHISPER", nil, name)
-			EC.LfRecipeList[name] = nil -- Clearing it so it doesn't growing larger unnecessarily 
+	if EC.LfRecipeList[name] ~= nil then
+		-- Iterates over the matches requested enchants (that is capable of doing) adds them to the message
+		local msg = EC.DB.MsgPrefix
+		local msgSuffix = EC.DB.MsgSuffix
+		for k, _ in pairs(EC.LfRecipeList[name]) do
+			msg = msg .. EC.DBChar.RecipeLinks[k] .. msgSuffix
 		end
+		SendChatMessage(msg, "WHISPER", nil, name)
+		EC.LfRecipeList[name] = nil -- Clearing it so it doesn't growing larger unnecessarily
+	end
 end
 
 -- For a message it will attempt to filter the request based on any of the words in EC.PrefixTags
@@ -112,13 +112,13 @@ function EC.ParseMessage(msg, name)
 	end
 
 	local isRequestValid = false
-	for _, v in pairs(EC.PrefixTags) do 
+	for _, v in pairs(EC.PrefixTags) do
 		if string.find(msg:lower(), "%f[%w_]" .. v .. "%f[^%w_]") then -- Important so it doesn't match things like LFW
 			isRequestValid = true
 		end
 	end
 
-	for _, v in pairs (EC.BlackList) do 
+	for _, v in pairs (EC.BlackList) do
 		if string.find(msg:lower(), "%f[%w_]" .. v .. "%f[^%w_]") then
 			if EC.DBChar.Debug == true then
 				print("Request: " .. msg .. " is being blacklisted due to tag: " .. v)
@@ -133,21 +133,21 @@ function EC.ParseMessage(msg, name)
 	-- The storing of the recipe links is really un-needed (leftover from another iteration) but I'm too lazy to change the code
 	for k, v in pairs(EC.DBChar.RecipeList) do
 		for _, v2 in pairs(v) do
-		if string.find(msg:lower(), v2, 1, true) then
-			if not EC.LfRecipeList[name] then EC.LfRecipeList[name] = {} end
-			if EC.DBChar.Debug == true then
-				print("User should be invited for msg: " .. msg)
-				print("Due to tag: " .. v2)
+			if string.find(msg:lower(), v2, 1, true) then
+				if not EC.LfRecipeList[name] then EC.LfRecipeList[name] = {} end
+				if EC.DBChar.Debug == true then
+					print("User should be invited for msg: " .. msg)
+					print("Due to tag: " .. v2)
+				end
+				shouldInvite = true
+				EC.LfRecipeList[name][k] = v2
 			end
-			shouldInvite = true
-			EC.LfRecipeList[name][k] = v2
-			end 
 		end
 	end
-	
+
 	if shouldInvite == true then
 		-- This check is in case there is a bug and it wrongly matches we don't continue spamming invite to the same user every time they post
-		if EC.PlayerList[name] == nil then 
+		if EC.PlayerList[name] == nil then
 			if EC.DBChar.Debug == true then
 				print("Inviting Player: " .. name .. " for request: " .. msg)
 			end
@@ -165,7 +165,7 @@ function EC.ParseMessage(msg, name)
 			EC.LfRecipeList[name] = nil
 		end
 	elseif EC.DB.WhisperLfRequests and isRequestValid and EC.PlayerList[name] == nil then
-	
+
 		local isGenericEnchantRequest = false
 		local stripedMsg = string.gsub(msg:lower(), "%s+", "")
 		for _, v in pairs(EC.EnchanterTags) do
@@ -175,7 +175,7 @@ function EC.ParseMessage(msg, name)
 			end
 		end
 
-		if isGenericEnchantRequest then 
+		if isGenericEnchantRequest then
 			EC.PlayerList[name] = 1
 			C_Timer.After(EC.DB.WhisperTimeDelay, function() SendChatMessage(EC.DB.LfWhisperMsg, "WHISPER", nil, name) end)
 		end
@@ -187,7 +187,7 @@ local function Event_CHAT_MSG_CHANNEL(msg,name,_3,_4,_5,_6,_7,channelID,channel,
 	if not EC.Initalized then return end
 	--[[ To be used later when I add an option to select which channels to parse from
 	if channelID ~= 4 then
-		EC.ParseMessage(msg, name)
+	EC.ParseMessage(msg, name)
 	end
 	--]]
 	EC.ParseMessage(msg, name)
@@ -195,9 +195,9 @@ end
 
 function Event_CHAT_MSG_SYSTEM(msg)
 	if (msg:match(_G["MARKED_AFK_MESSAGE"]:gsub("%%s", "%s-"))
-	or msg:match(_G["MARKED_DND"])
-	or msg:match(_G["IDLE_MESSAGE"]))
-	and EC.DB.AfkStop then
+		or msg:match(_G["MARKED_DND"])
+		or msg:match(_G["IDLE_MESSAGE"]))
+		and EC.DB.AfkStop then
 		EC.Stop()
 	elseif msg:match(_G["CLEARED_AFK"]) and EC.DB.AfkStart then
 		EC.Start()
@@ -211,7 +211,7 @@ local function Event_ADDON_LOADED(arg1)
 end
 
 function EC.OnLoad()
-    EC.Tool.RegisterEvent("ADDON_LOADED",Event_ADDON_LOADED)
+	EC.Tool.RegisterEvent("ADDON_LOADED",Event_ADDON_LOADED)
 	EC.Tool.RegisterEvent("CHAT_MSG_CHANNEL",Event_CHAT_MSG_CHANNEL)
 	EC.Tool.RegisterEvent("CHAT_MSG_SAY",Event_CHAT_MSG_CHANNEL)
 	EC.Tool.RegisterEvent("CHAT_MSG_YELL",Event_CHAT_MSG_CHANNEL)

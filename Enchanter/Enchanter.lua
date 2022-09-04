@@ -17,10 +17,10 @@ function EC.GetItems()
 	EC.DBChar.RecipeLinks = {}
 
 	CastSpellByName("Enchanting")
-	for i = 1, GetNumCrafts(), 1 do
-		local craftName, _, craftType, numAvailable = GetCraftInfo(i);
+	for i = 1, GetNumTradeSkills(), 1 do
+		local craftName, _, craftType, numAvailable = GetTradeSkillInfo(i);
 		if EC.RecipeTags["enGB"][craftName] ~= nil then
-			EC.DBChar.RecipeLinks[craftName] = GetCraftRecipeLink(i)
+			EC.DBChar.RecipeLinks[craftName] = GetTradeSkillRecipeLink(i)
 			EC.DBChar.RecipeList[craftName] = EC.RecipeTags["enGB"][craftName]
 		end
 	end
